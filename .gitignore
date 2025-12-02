@@ -43,3 +43,6 @@ config/
 .HA_VERSION
 home-assistant.log
 home-assistant_v2.db
+
+# Project internal
+bugs.md
