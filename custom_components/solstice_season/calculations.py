@@ -209,6 +209,43 @@ def determine_current_season_astronomical(
         return SEASON_SUMMER
 
 
+def get_meteorological_events(year: int, hemisphere: str) -> AstronomicalEvents:
+    """Get meteorological season start dates for a given year.
+
+    Returns fixed calendar dates (1st of month) at 00:00 UTC for each season.
+    Uses the same key structure as astronomical events for compatibility.
+
+    Args:
+        year: The year to get dates for.
+        hemisphere: Either 'northern' or 'southern'.
+
+    Returns:
+        Dictionary containing all four season start dates with UTC datetimes.
+    """
+    seasons = METEOROLOGICAL_SEASONS[hemisphere]
+
+    # Map seasons to the astronomical event keys based on hemisphere
+    # Northern: spring=march, summer=june, autumn=september, winter=december
+    # Southern: spring=september, summer=december, autumn=march, winter=june
+    if hemisphere == HEMISPHERE_NORTHERN:
+        march_month, march_day = seasons[SEASON_SPRING]
+        june_month, june_day = seasons[SEASON_SUMMER]
+        september_month, september_day = seasons[SEASON_AUTUMN]
+        december_month, december_day = seasons[SEASON_WINTER]
+    else:
+        march_month, march_day = seasons[SEASON_AUTUMN]
+        june_month, june_day = seasons[SEASON_WINTER]
+        september_month, september_day = seasons[SEASON_SPRING]
+        december_month, december_day = seasons[SEASON_SUMMER]
+
+    return AstronomicalEvents(
+        march_equinox=datetime(year, march_month, march_day, 0, 0, 0, tzinfo=timezone.utc),
+        june_solstice=datetime(year, june_month, june_day, 0, 0, 0, tzinfo=timezone.utc),
+        september_equinox=datetime(year, september_month, september_day, 0, 0, 0, tzinfo=timezone.utc),
+        december_solstice=datetime(year, december_month, december_day, 0, 0, 0, tzinfo=timezone.utc),
+    )
+
+
 def determine_current_season_meteorological(hemisphere: str, now: datetime) -> str:
     """Determine the current season using meteorological calculation.
 
@@ -327,14 +364,17 @@ def calculate_season_data(hemisphere: str, mode: str, now: datetime) -> SeasonDa
         Dictionary containing all calculated season data.
     """
     year = now.year
-    current_events = get_astronomical_events(year)
-    next_events = get_astronomical_events(year + 1)
 
+    # Get events based on calculation mode
     if mode == MODE_ASTRONOMICAL:
+        current_events = get_astronomical_events(year)
+        next_events = get_astronomical_events(year + 1)
         current_season = determine_current_season_astronomical(
             hemisphere, now, current_events
         )
     else:
+        current_events = get_meteorological_events(year, hemisphere)
+        next_events = get_meteorological_events(year + 1, hemisphere)
         current_season = determine_current_season_meteorological(hemisphere, now)
 
     mapping = SEASON_MAPPING[hemisphere]
