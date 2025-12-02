@@ -46,3 +46,6 @@ home-assistant_v2.db
 
 # Project internal
 bugs.md
+assets/
+KONZEPT_solstice_season.md
+prompt.md
