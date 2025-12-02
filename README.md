@@ -111,6 +111,10 @@ Each sensor has:
 
 After an event occurs, the sensor automatically shows the next year's date.
 
+**Note:** The timestamps reflect the configured calculation mode:
+- **Astronomical**: Precise moments calculated by PyEphem (e.g., `2026-03-20T14:46:00+00:00`)
+- **Meteorological**: Fixed calendar dates at midnight UTC (e.g., `2026-03-01T00:00:00+00:00`)
+
 ### Daylight Trend
 
 | Property | Value |
