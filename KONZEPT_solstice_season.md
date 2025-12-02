@@ -1,6 +1,6 @@
 # Konzeptdokument: Home Assistant Integration `solstice_season`
 
-**Version:** 1.0  
+**Version:** 1.1
 **Datum:** 2. Dezember 2025  
 **Zielplattform:** Home Assistant Custom Integration  
 **Entwicklungssprache:** Englisch (Code, Kommentare, Variablen)  
@@ -71,7 +71,7 @@ Die Integration stellt **7 Sensoren** bereit. Alle Sensoren gehören zu einem ge
 
 **Astronomischer Modus:**
 - Basiert auf den exakten Zeitpunkten der Sonnenwenden und Tagundnachtgleichen
-- Verwendet die `astral`-Library zur Berechnung
+- Verwendet die `ephem`-Library (PyEphem) zur Berechnung
 
 **Meteorologischer (Kalendarischer) Modus:**
 - Nordhalbkugel: Frühling ab 1. März, Sommer ab 1. Juni, Herbst ab 1. September, Winter ab 1. Dezember
@@ -312,11 +312,11 @@ custom_components/
 
 | Library | Verwendung | In HA Core? |
 |---------|------------|-------------|
-| `astral` | Berechnung der Sonnenwenden/Tagundnachtgleichen | ✅ Ja (bereits vorhanden) |
+| `ephem` | Berechnung der Sonnenwenden/Tagundnachtgleichen | ✅ Ja (von season-Integration verwendet) |
 
-Die `astral`-Library ist bereits Teil von Home Assistant Core und muss nicht als zusätzliche Dependency deklariert werden.
+Die `ephem`-Library (PyEphem) wird auch von der Home Assistant Core `season`-Integration verwendet. Sie berechnet astronomische Ereignisse lokal ohne Internetverbindung.
 
-**Referenz:** https://astral.readthedocs.io/
+**Referenz:** https://rhodesmill.org/pyephem/
 
 #### Home Assistant Helpers
 
@@ -403,28 +403,26 @@ timestamp = event_datetime.isoformat()
 
 ## 6. Berechnungslogik
 
-### 6.1 Astronomische Ereignisse mit `astral`
+### 6.1 Astronomische Ereignisse mit `ephem`
 
 ```python
-from astral import sun
-from datetime import date
+import ephem
+from datetime import datetime, timezone
 
-def get_march_equinox(year: int) -> datetime:
-    """Get the March equinox for a given year."""
-    # astral liefert die exakten Zeitpunkte
-    return sun.march_equinox(year)
+def _ephem_date_to_datetime(ephem_date: ephem.Date) -> datetime:
+    """Convert an ephem.Date to a timezone-aware UTC datetime."""
+    return ephem_date.datetime().replace(tzinfo=timezone.utc)
 
-def get_june_solstice(year: int) -> datetime:
-    """Get the June solstice for a given year."""
-    return sun.june_solstice(year)
+def get_astronomical_events(year: int) -> dict:
+    """Get all astronomical events for a given year."""
+    jan_first = ephem.Date(f"{year}/1/1")
 
-def get_september_equinox(year: int) -> datetime:
-    """Get the September equinox for a given year."""
-    return sun.september_equinox(year)
-
-def get_december_solstice(year: int) -> datetime:
-    """Get the December solstice for a given year."""
-    return sun.december_solstice(year)
+    return {
+        "march_equinox": _ephem_date_to_datetime(ephem.next_vernal_equinox(jan_first)),
+        "june_solstice": _ephem_date_to_datetime(ephem.next_summer_solstice(jan_first)),
+        "september_equinox": _ephem_date_to_datetime(ephem.next_autumnal_equinox(jan_first)),
+        "december_solstice": _ephem_date_to_datetime(ephem.next_winter_solstice(jan_first)),
+    }
 ```
 
 ### 6.2 Hemisphären-Mapping
@@ -695,14 +693,14 @@ class CurrentSeasonSensor(CoordinatorEntity, SensorEntity):
 {
   "domain": "solstice_season",
   "name": "Solstice Season",
-  "codeowners": ["@dein-github-username"],
+  "codeowners": ["@moerk-o"],
   "config_flow": true,
-  "documentation": "https://github.com/dein-username/ha-solstice-season",
+  "documentation": "https://github.com/moerk-o/ha-solstice_season",
   "integration_type": "service",
   "iot_class": "calculated",
-  "issue_tracker": "https://github.com/dein-username/ha-solstice-season/issues",
-  "requirements": [],
-  "version": "1.0.0"
+  "issue_tracker": "https://github.com/moerk-o/ha-solstice_season/issues",
+  "requirements": ["ephem>=4.1.0"],
+  "version": "1.1.0"
 }
 ```
 
@@ -714,7 +712,7 @@ class CurrentSeasonSensor(CoordinatorEntity, SensorEntity):
 | `config_flow` | `true` | Integration nutzt UI-Konfiguration |
 | `integration_type` | `service` | Keine Hardware, reiner Service |
 | `iot_class` | `calculated` | Daten werden lokal berechnet, kein Netzwerk nötig |
-| `requirements` | `[]` | Keine externen Dependencies (astral ist in HA Core) |
+| `requirements` | `["ephem>=4.1.0"]` | PyEphem für astronomische Berechnungen |
 
 **Referenz:** https://developers.home-assistant.io/docs/creating_integration_manifest/
 
@@ -798,7 +796,7 @@ ICON_TREND_SOLSTICE: Final = "mdi:arrow-left-right-bold-outline"
 | Jahreszeiten (Wikipedia DE) | https://de.wikipedia.org/wiki/Jahreszeit |
 | Sonnenwende (Wikipedia DE) | https://de.wikipedia.org/wiki/Sonnenwende |
 | Tagundnachtgleiche (Wikipedia DE) | https://de.wikipedia.org/wiki/Tagundnachtgleiche |
-| astral Library | https://astral.readthedocs.io/ |
+| PyEphem Library | https://rhodesmill.org/pyephem/ |
 
 ### Referenz-Integrationen
 

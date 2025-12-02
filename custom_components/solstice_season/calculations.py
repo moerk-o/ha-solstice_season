@@ -3,15 +3,18 @@
 This module contains all calculation logic for seasons, equinoxes,
 solstices, and daylight trends. It is independent of Home Assistant
 to allow for easier testing and maintenance.
+
+Uses the ephem library for precise astronomical calculations.
 """
 
 from datetime import date, datetime, timezone
 from typing import TypedDict
 
-from astral import sun
+import ephem
 
 from .const import (
     HEMISPHERE_NORTHERN,
+    HEMISPHERE_SOUTHERN,
     MODE_ASTRONOMICAL,
     SEASON_AUTUMN,
     SEASON_SPRING,
@@ -62,7 +65,7 @@ SEASON_MAPPING = {
         SEASON_AUTUMN: "september_equinox",
         SEASON_WINTER: "december_solstice",
     },
-    "southern": {
+    HEMISPHERE_SOUTHERN: {
         SEASON_SPRING: "september_equinox",
         SEASON_SUMMER: "december_solstice",
         SEASON_AUTUMN: "march_equinox",
@@ -78,7 +81,7 @@ METEOROLOGICAL_SEASONS = {
         SEASON_AUTUMN: (9, 1),
         SEASON_WINTER: (12, 1),
     },
-    "southern": {
+    HEMISPHERE_SOUTHERN: {
         SEASON_SPRING: (9, 1),
         SEASON_SUMMER: (12, 1),
         SEASON_AUTUMN: (3, 1),
@@ -87,8 +90,24 @@ METEOROLOGICAL_SEASONS = {
 }
 
 
+def _ephem_date_to_datetime(ephem_date: ephem.Date) -> datetime:
+    """Convert an ephem.Date to a timezone-aware UTC datetime.
+
+    Args:
+        ephem_date: An ephem.Date object.
+
+    Returns:
+        A timezone-aware datetime in UTC.
+    """
+    return ephem_date.datetime().replace(tzinfo=timezone.utc)
+
+
 def get_astronomical_events(year: int) -> AstronomicalEvents:
     """Get all astronomical events for a given year.
+
+    Uses ephem library to calculate precise equinox and solstice times.
+    The calculation starts from January 1st of the given year and finds
+    the next occurrence of each event.
 
     Args:
         year: The year to calculate events for.
@@ -96,19 +115,18 @@ def get_astronomical_events(year: int) -> AstronomicalEvents:
     Returns:
         Dictionary containing all four astronomical events with UTC datetimes.
     """
+    jan_first = ephem.Date(f"{year}/1/1")
+
+    march_equinox = _ephem_date_to_datetime(ephem.next_vernal_equinox(jan_first))
+    june_solstice = _ephem_date_to_datetime(ephem.next_summer_solstice(jan_first))
+    september_equinox = _ephem_date_to_datetime(ephem.next_autumnal_equinox(jan_first))
+    december_solstice = _ephem_date_to_datetime(ephem.next_winter_solstice(jan_first))
+
     return AstronomicalEvents(
-        march_equinox=sun.equinox(year, sun.SunDirection.RISING).replace(
-            tzinfo=timezone.utc
-        ),
-        june_solstice=sun.solstice(year, sun.SunDirection.RISING).replace(
-            tzinfo=timezone.utc
-        ),
-        september_equinox=sun.equinox(year, sun.SunDirection.SETTING).replace(
-            tzinfo=timezone.utc
-        ),
-        december_solstice=sun.solstice(year, sun.SunDirection.SETTING).replace(
-            tzinfo=timezone.utc
-        ),
+        march_equinox=march_equinox,
+        june_solstice=june_solstice,
+        september_equinox=september_equinox,
+        december_solstice=december_solstice,
     )
 
 
@@ -164,15 +182,12 @@ def determine_current_season_astronomical(
     """
     mapping = SEASON_MAPPING[hemisphere]
 
-    # Get event datetimes
     spring_start = events[mapping[SEASON_SPRING]]
     summer_start = events[mapping[SEASON_SUMMER]]
     autumn_start = events[mapping[SEASON_AUTUMN]]
     winter_start = events[mapping[SEASON_WINTER]]
 
-    # Sort by month to handle year boundary correctly
     if hemisphere == HEMISPHERE_NORTHERN:
-        # Northern: spring(Mar) -> summer(Jun) -> autumn(Sep) -> winter(Dec)
         if now >= winter_start:
             return SEASON_WINTER
         if now >= autumn_start:
@@ -181,9 +196,8 @@ def determine_current_season_astronomical(
             return SEASON_SUMMER
         if now >= spring_start:
             return SEASON_SPRING
-        return SEASON_WINTER  # Before March equinox = still winter
+        return SEASON_WINTER
     else:
-        # Southern: autumn(Mar) -> winter(Jun) -> spring(Sep) -> summer(Dec)
         if now >= summer_start:
             return SEASON_SUMMER
         if now >= spring_start:
@@ -192,11 +206,15 @@ def determine_current_season_astronomical(
             return SEASON_WINTER
         if now >= autumn_start:
             return SEASON_AUTUMN
-        return SEASON_SUMMER  # Before March equinox = still summer
+        return SEASON_SUMMER
 
 
 def determine_current_season_meteorological(hemisphere: str, now: datetime) -> str:
     """Determine the current season using meteorological calculation.
+
+    Meteorological seasons are based on fixed calendar dates:
+    - Northern: Spring Mar 1, Summer Jun 1, Autumn Sep 1, Winter Dec 1
+    - Southern: Spring Sep 1, Summer Dec 1, Autumn Mar 1, Winter Jun 1
 
     Args:
         hemisphere: Either 'northern' or 'southern'.
@@ -208,12 +226,10 @@ def determine_current_season_meteorological(hemisphere: str, now: datetime) -> s
     month = now.month
     seasons = METEOROLOGICAL_SEASONS[hemisphere]
 
-    # Create list of (start_month, season) sorted by month
     season_starts = [(seasons[s][0], s) for s in seasons]
     season_starts.sort(key=lambda x: x[0])
 
-    # Find current season
-    current_season = season_starts[-1][1]  # Default to last season (handles Dec-Feb)
+    current_season = season_starts[-1][1]
     for start_month, season in season_starts:
         if month >= start_month:
             current_season = season
@@ -241,17 +257,13 @@ def calculate_daylight_trend(
     """
     today = now.date()
 
-    # Check if today is a solstice day
     if today == june_solstice.date() or today == december_solstice.date():
         return TREND_SOLSTICE
 
-    # After December solstice until June solstice: days getting longer
-    # After June solstice until December solstice: days getting shorter
     if now < june_solstice:
         return TREND_LONGER
     if now < december_solstice:
         return TREND_SHORTER
-    # After December solstice
     return TREND_LONGER
 
 
@@ -290,7 +302,6 @@ def get_next_solstice(
             else "summer_solstice"
         )
     else:
-        # After December solstice, next is June of next year
         next_solstice = next_year_events["june_solstice"]
         event_type = (
             "summer_solstice"
@@ -319,7 +330,6 @@ def calculate_season_data(hemisphere: str, mode: str, now: datetime) -> SeasonDa
     current_events = get_astronomical_events(year)
     next_events = get_astronomical_events(year + 1)
 
-    # Determine current season
     if mode == MODE_ASTRONOMICAL:
         current_season = determine_current_season_astronomical(
             hemisphere, now, current_events
@@ -327,10 +337,8 @@ def calculate_season_data(hemisphere: str, mode: str, now: datetime) -> SeasonDa
     else:
         current_season = determine_current_season_meteorological(hemisphere, now)
 
-    # Get season mapping for this hemisphere
     mapping = SEASON_MAPPING[hemisphere]
 
-    # Get next occurrence of each seasonal event
     spring_event = get_next_event_date(
         mapping[SEASON_SPRING], current_events, next_events, now
     )
@@ -344,27 +352,23 @@ def calculate_season_data(hemisphere: str, mode: str, now: datetime) -> SeasonDa
         mapping[SEASON_WINTER], current_events, next_events, now
     )
 
-    # Calculate days until each event
     today = now.date()
     days_until_spring = calculate_days_until(spring_event.date(), today)
     days_until_summer = calculate_days_until(summer_event.date(), today)
     days_until_autumn = calculate_days_until(autumn_event.date(), today)
     days_until_winter = calculate_days_until(winter_event.date(), today)
 
-    # Get season start dates for current year (for attributes)
     spring_start_event = current_events[mapping[SEASON_SPRING]]
     summer_start_event = current_events[mapping[SEASON_SUMMER]]
     autumn_start_event = current_events[mapping[SEASON_AUTUMN]]
     winter_start_event = current_events[mapping[SEASON_WINTER]]
 
-    # Calculate daylight trend
     daylight_trend = calculate_daylight_trend(
         now,
         current_events["june_solstice"],
         current_events["december_solstice"],
     )
 
-    # Get next trend change (next solstice)
     next_trend_change, next_trend_event_type = get_next_solstice(
         hemisphere, now, current_events, next_events
     )
