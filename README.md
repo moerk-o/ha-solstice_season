@@ -111,9 +111,7 @@ Each sensor has:
 
 After an event occurs, the sensor automatically shows the next year's date.
 
-**Note:** The timestamps reflect the configured calculation mode:
-- **Astronomical**: Precise moments calculated by PyEphem (e.g., `2026-03-20T14:46:00+00:00`)
-- **Meteorological**: Fixed calendar dates at midnight UTC (e.g., `2026-03-01T00:00:00+00:00`)
+**Note:** The timestamps reflect the configured calculation mode (see [Understanding Timezone Handling](#understanding-timezone-handling) for details).
 
 ### Daylight Trend
 
@@ -151,6 +149,29 @@ Shows when the daylight trend will reverse (the next solstice).
 | IoT Class | `calculated` |
 | Calculation Library | [PyEphem](https://rhodesmill.org/pyephem/) |
 | Platforms | Sensor |
+
+## Understanding Timezone Handling
+
+All timestamps are stored in **UTC**, following Home Assistant's internal design principle. Home Assistant automatically converts these to your local timezone for display in the frontend.
+
+### What This Means in Practice
+
+**Astronomical Mode:**
+The Spring Equinox 2026 occurs at `2026-03-20T14:46:00+00:00` (UTC). If you're in Central European Time, you'll see `15:46` (CET) or `16:46` (CEST) - this is the exact moment the event occurs at your location.
+
+**Meteorological Mode:**
+Season dates are stored as midnight UTC on the first day of the month. For example, meteorological spring is stored as `2026-03-01T00:00:00+00:00`. In Central European Time, this displays as `01:00` (CET) or `02:00` (CEST).
+
+### Using Timestamps in Automations
+
+When you use a timestamp sensor as an automation trigger, it fires at the stored UTC moment:
+
+| Mode | Stored (UTC) | Display (CET) | Automation triggers |
+|------|--------------|---------------|---------------------|
+| Astronomical | `2026-03-20T14:46:00Z` | 15:46 | 15:46 local time |
+| Meteorological | `2026-03-01T00:00:00Z` | 01:00 | 01:00 local time |
+
+This UTC-based approach ensures consistency: the same timestamp always refers to the same moment in time, regardless of timezone changes or daylight saving time transitions.
 
 ## Localization
 
