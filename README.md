@@ -181,6 +181,7 @@ The integration supports multiple languages through Home Assistant's translation
 
 - English (fallback)
 - German (Deutsch)
+- Dutch (Nederlands)
 
 ## Contributing
 
