@@ -65,6 +65,9 @@
       },
       "next_daylight_trend_change": {
         "name": "Volgende trendwijziging"
+      },
+      "next_season_change": {
+        "name": "Volgende seizoenswisseling"
       }
     }
   }

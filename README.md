@@ -71,7 +71,7 @@ The integration is configured entirely through the UI. No YAML required.
 
 ## Sensors
 
-The integration creates **7 sensors**, all grouped under a single device:
+The integration creates **8 sensors**, all grouped under a single device:
 
 ### Current Season
 
@@ -112,6 +112,23 @@ Each sensor has:
 After an event occurs, the sensor automatically shows the next year's date.
 
 **Note:** The timestamps reflect the configured calculation mode (see [Understanding Timezone Handling](#understanding-timezone-handling) for details).
+
+### Next Season Change
+
+| Property | Value |
+|----------|-------|
+| Entity ID | `sensor.{name}_next_season_change` |
+| Device Class | `timestamp` |
+| Icon | `mdi:timelapse` |
+
+Shows when the next season will begin and which season it will be.
+
+**Attributes:**
+
+| Attribute | Description |
+|-----------|-------------|
+| `days_until` | Days until the next season starts |
+| `event_type` | `spring`, `summer`, `autumn`, or `winter` |
 
 ### Daylight Trend
 

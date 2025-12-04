@@ -55,6 +55,9 @@ class SeasonData(TypedDict):
     next_trend_change: datetime
     days_until_trend_change: int
     next_trend_event_type: str
+    next_season_change: datetime
+    next_season_change_event_type: str
+    days_until_season_change: int
 
 
 # Mapping of seasons to astronomical events per hemisphere
@@ -349,6 +352,45 @@ def get_next_solstice(
     return next_solstice, event_type
 
 
+def get_next_season_change(
+    current_season: str,
+    hemisphere: str,
+    current_year_events: AstronomicalEvents,
+    next_year_events: AstronomicalEvents,
+    now: datetime,
+) -> tuple[datetime, str]:
+    """Get the next season change datetime and the upcoming season.
+
+    Args:
+        current_season: The current season (spring, summer, autumn, winter).
+        hemisphere: Either 'northern' or 'southern'.
+        current_year_events: Events for the current year.
+        next_year_events: Events for the next year.
+        now: Current datetime.
+
+    Returns:
+        Tuple of (next season change datetime, upcoming season name).
+    """
+    # Define the season order
+    season_order = [SEASON_SPRING, SEASON_SUMMER, SEASON_AUTUMN, SEASON_WINTER]
+
+    # Find current season index and determine next season
+    current_index = season_order.index(current_season)
+    next_index = (current_index + 1) % 4
+    next_season = season_order[next_index]
+
+    # Get the event name for the next season
+    mapping = SEASON_MAPPING[hemisphere]
+    event_name = mapping[next_season]
+
+    # Get the datetime for that event
+    next_change = get_next_event_date(
+        event_name, current_year_events, next_year_events, now
+    )
+
+    return next_change, next_season
+
+
 def calculate_season_data(hemisphere: str, mode: str, now: datetime) -> SeasonData:
     """Calculate all season-related data.
 
@@ -414,6 +456,11 @@ def calculate_season_data(hemisphere: str, mode: str, now: datetime) -> SeasonDa
     )
     days_until_trend_change = calculate_days_until(next_trend_change.date(), today)
 
+    next_season_change, next_season_change_event_type = get_next_season_change(
+        current_season, hemisphere, current_events, next_events, now
+    )
+    days_until_season_change = calculate_days_until(next_season_change.date(), today)
+
     return SeasonData(
         current_season=current_season,
         spring_start=spring_start_event.date().isoformat(),
@@ -432,4 +479,7 @@ def calculate_season_data(hemisphere: str, mode: str, now: datetime) -> SeasonDa
         next_trend_change=next_trend_change,
         days_until_trend_change=days_until_trend_change,
         next_trend_event_type=next_trend_event_type,
+        next_season_change=next_season_change,
+        next_season_change_event_type=next_season_change_event_type,
+        days_until_season_change=days_until_season_change,
     )
