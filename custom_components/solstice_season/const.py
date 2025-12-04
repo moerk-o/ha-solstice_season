@@ -39,6 +39,7 @@ SENSOR_AUTUMN_EQUINOX: Final = "autumn_equinox"
 SENSOR_WINTER_SOLSTICE: Final = "winter_solstice"
 SENSOR_DAYLIGHT_TREND: Final = "daylight_trend"
 SENSOR_NEXT_TREND_CHANGE: Final = "next_daylight_trend_change"
+SENSOR_NEXT_SEASON_CHANGE: Final = "next_season_change"
 
 # Icons
 ICON_SPRING: Final = "mdi:flower"
@@ -49,6 +50,7 @@ ICON_TREND_LONGER: Final = "mdi:arrow-right-bold-outline"
 ICON_TREND_SHORTER: Final = "mdi:arrow-left-bold-outline"
 ICON_TREND_SOLSTICE: Final = "mdi:arrow-left-right-bold-outline"
 ICON_NEXT_TREND_CHANGE: Final = "mdi:sun-clock"
+ICON_NEXT_SEASON_CHANGE: Final = "mdi:timelapse"
 
 # Season icon mapping
 SEASON_ICONS: Final = {

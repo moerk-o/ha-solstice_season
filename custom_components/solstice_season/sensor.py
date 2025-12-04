@@ -25,6 +25,7 @@ from .const import (
     CONF_NAME,
     DOMAIN,
     ICON_AUTUMN,
+    ICON_NEXT_SEASON_CHANGE,
     ICON_NEXT_TREND_CHANGE,
     ICON_SPRING,
     ICON_SUMMER,
@@ -33,6 +34,7 @@ from .const import (
     SENSOR_AUTUMN_EQUINOX,
     SENSOR_CURRENT_SEASON,
     SENSOR_DAYLIGHT_TREND,
+    SENSOR_NEXT_SEASON_CHANGE,
     SENSOR_NEXT_TREND_CHANGE,
     SENSOR_SPRING_EQUINOX,
     SENSOR_SUMMER_SOLSTICE,
@@ -135,6 +137,17 @@ SENSOR_DESCRIPTIONS: tuple[SolsticeSeasonSensorEntityDescription, ...] = (
         extra_state_attributes_fn=lambda data: {
             "days_until": data["days_until_trend_change"],
             "event_type": data["next_trend_event_type"],
+        },
+    ),
+    SolsticeSeasonSensorEntityDescription(
+        key=SENSOR_NEXT_SEASON_CHANGE,
+        translation_key=SENSOR_NEXT_SEASON_CHANGE,
+        device_class=SensorDeviceClass.TIMESTAMP,
+        icon=ICON_NEXT_SEASON_CHANGE,
+        value_fn=lambda data: data["next_season_change"],
+        extra_state_attributes_fn=lambda data: {
+            "days_until": data["days_until_season_change"],
+            "event_type": data["next_season_change_event_type"],
         },
     ),
 )
