@@ -46,7 +46,7 @@ The integration handles this automatically based on the configured hemisphere se
 
 ### HACS (Recommended)
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=moerk-o&repo=ha-solstice_season&category=integration)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=moerk-o&repository=ha-solstice_season)
 
 1. Click the button above, or search for **Solstice Season** in HACS
 2. Install the integration
