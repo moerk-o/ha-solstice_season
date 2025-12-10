@@ -1,8 +1,8 @@
 # Solstice Season
 
 [![GitHub Release](https://img.shields.io/github/v/release/moerk-o/ha-solstice_season?style=flat-square)](https://github.com/moerk-o/ha-solstice_season/releases)
+[![HACS](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=flat-square)](https://github.com/hacs/integration)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Custom%20Integration-41bdf5?style=flat-square&logo=homeassistant)](https://www.home-assistant.io/)
 
 A Home Assistant custom integration that provides precise astronomical season information with exact timestamps for solstices and equinoxes.
 
@@ -43,6 +43,16 @@ The Earth's tilt means seasons are reversed between hemispheres:
 The integration handles this automatically based on the configured hemisphere setting.
 
 ## Installation
+
+### HACS (Recommended)
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=moerk-o&repo=ha-solstice_season&category=integration)
+
+1. Click the button above, or search for **Solstice Season** in HACS
+2. Install the integration
+3. Restart Home Assistant
+4. Go to **Settings** → **Devices & Services** → **Add Integration**
+5. Search for **Solstice Season** and follow the setup wizard
 
 ### Manual Installation
 
