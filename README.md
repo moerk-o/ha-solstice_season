@@ -3,6 +3,7 @@
 [![GitHub Release](https://img.shields.io/github/v/release/moerk-o/ha-solstice_season?style=flat-square)](https://github.com/moerk-o/ha-solstice_season/releases)
 [![HACS](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=flat-square)](https://github.com/hacs/integration)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Custom%20Integration-41bdf5?style=flat-square&logo=homeassistant)](https://www.home-assistant.io/)
 
 A Home Assistant custom integration that provides precise astronomical season information with exact timestamps for solstices and equinoxes.
 
