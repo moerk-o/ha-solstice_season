@@ -51,12 +51,17 @@ class SolsticeSeasonConfigFlow(ConfigFlow, domain=DOMAIN):
                 data=user_input,
             )
 
+        # Determine default hemisphere from Home Assistant's configured latitude
+        default_hemisphere = (
+            HEMISPHERE_NORTHERN if self.hass.config.latitude >= 0 else HEMISPHERE_SOUTHERN
+        )
+
         # Build the form schema
         data_schema = vol.Schema(
             {
                 vol.Required(CONF_NAME, default=DEFAULT_NAME): str,
                 vol.Required(
-                    CONF_HEMISPHERE, default=HEMISPHERE_NORTHERN
+                    CONF_HEMISPHERE, default=default_hemisphere
                 ): selector.SelectSelector(
                     selector.SelectSelectorConfig(
                         options=[

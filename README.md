@@ -70,7 +70,7 @@ The integration is configured entirely through the UI. No YAML required.
 | Option | Description | Default |
 |--------|-------------|---------|
 | **Name** | Instance name (used as entity prefix) | `Home` |
-| **Hemisphere** | Northern or Southern | Northern |
+| **Hemisphere** | Northern or Southern | Auto (based on configured Home location) |
 | **Mode** | Astronomical or Meteorological | Astronomical |
 
 ### Calculation Modes
