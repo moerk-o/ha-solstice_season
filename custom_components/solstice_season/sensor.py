@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -42,6 +44,10 @@ from .const import (
     TREND_ICONS,
 )
 from .coordinator import SolsticeSeasonCoordinator
+
+# Load version from manifest.json
+MANIFEST = json.loads((Path(__file__).parent / "manifest.json").read_text())
+VERSION = MANIFEST["version"]
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -212,7 +218,7 @@ class SolsticeSeasonSensor(
             name=self._config_entry.data[CONF_NAME],
             manufacturer="Solstice Season",
             model="Astronomical Calculator",
-            sw_version="1.0.0",
+            sw_version=VERSION,
         )
 
     @property
