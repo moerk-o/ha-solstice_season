@@ -1,0 +1,24 @@
+name: "Release"
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  release:
+    name: "Release solstice_season"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout the repository"
+        uses: actions/checkout@v4
+
+      - name: "Create zip package"
+        run: |
+          cd "${{ github.workspace }}/custom_components/solstice_season"
+          zip solstice_season.zip -r ./
+
+      - name: "Upload zip to release"
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ github.workspace }}/custom_components/solstice_season/solstice_season.zip
