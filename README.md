@@ -99,6 +99,7 @@ The integration creates **8 sensors**, all grouped under a single device:
 |-----------|-------------|
 | `mode` | `astronomical` or `meteorological` |
 | `hemisphere` | `northern` or `southern` |
+| `season_age` | Days since the current season started |
 | `spring_start` | Start date of spring in current year |
 | `summer_start` | Start date of summer in current year |
 | `autumn_start` | Start date of autumn in current year |

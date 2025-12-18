@@ -79,6 +79,7 @@ SENSOR_DESCRIPTIONS: tuple[SolsticeSeasonSensorEntityDescription, ...] = (
         extra_state_attributes_fn=lambda data: {
             "mode": data.get("mode", "astronomical"),
             "hemisphere": data.get("hemisphere", "northern"),
+            "season_age": data["season_age"],
             "spring_start": data["spring_start"],
             "summer_start": data["summer_start"],
             "autumn_start": data["autumn_start"],
