@@ -407,10 +407,14 @@ def calculate_season_data(hemisphere: str, mode: str, now: datetime) -> SeasonDa
     """
     year = now.year
 
-    # Get events based on calculation mode
+    # Always get astronomical events (needed for daylight trend calculation)
+    astronomical_events = get_astronomical_events(year)
+    astronomical_events_next = get_astronomical_events(year + 1)
+
+    # Get events based on calculation mode for season determination
     if mode == MODE_ASTRONOMICAL:
-        current_events = get_astronomical_events(year)
-        next_events = get_astronomical_events(year + 1)
+        current_events = astronomical_events
+        next_events = astronomical_events_next
         current_season = determine_current_season_astronomical(
             hemisphere, now, current_events
         )
@@ -445,14 +449,15 @@ def calculate_season_data(hemisphere: str, mode: str, now: datetime) -> SeasonDa
     autumn_start_event = current_events[mapping[SEASON_AUTUMN]]
     winter_start_event = current_events[mapping[SEASON_WINTER]]
 
+    # Daylight trend is always based on astronomical solstices (physical reality)
     daylight_trend = calculate_daylight_trend(
         now,
-        current_events["june_solstice"],
-        current_events["december_solstice"],
+        astronomical_events["june_solstice"],
+        astronomical_events["december_solstice"],
     )
 
     next_trend_change, next_trend_event_type = get_next_solstice(
-        hemisphere, now, current_events, next_events
+        hemisphere, now, astronomical_events, astronomical_events_next
     )
     days_until_trend_change = calculate_days_until(next_trend_change.date(), today)
 
