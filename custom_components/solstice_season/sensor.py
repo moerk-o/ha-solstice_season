@@ -32,6 +32,7 @@ from .const import (
     ICON_SPRING,
     ICON_SUMMER,
     ICON_WINTER,
+    MODE_ASTRONOMICAL,
     SEASON_ICONS,
     SENSOR_AUTUMN_EQUINOX,
     SENSOR_CURRENT_SEASON,
@@ -214,11 +215,18 @@ class SolsticeSeasonSensor(
 
         All sensors are grouped under a single device with the user's chosen name.
         """
+        mode = self._config_entry.data[CONF_MODE]
+        model = (
+            "Astronomical Calculator"
+            if mode == MODE_ASTRONOMICAL
+            else "Meteorological Calculator"
+        )
+
         return DeviceInfo(
             identifiers={(DOMAIN, self._config_entry.entry_id)},
             name=self._config_entry.data[CONF_NAME],
             manufacturer="Solstice Season",
-            model="Astronomical Calculator",
+            model=model,
             sw_version=VERSION,
         )
 
